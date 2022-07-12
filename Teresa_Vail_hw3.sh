@@ -115,23 +115,20 @@ echo "Mean frequency using floating point arithemetics = $fp_mean"
 # # and file will be added , commited and pushed to remote master using one lazy_commit command.
 
 
-# function lazy_commit() {
-#   git add $1 &&
-#   git commit -m "$2" &&
-#   git branch -M main &&
-#   git push -u origin main
-#     }
 
-function lazy_commit() {
-  if [ $# -lt 2 ]
-  then
-    echo "Not enough parameters"
-    return
+
+function lazy_commit(){
+
+  if [ $# -lt 2]
+  then 
+    echo "Please enter at least one file name"
+    echo "Format is 'lazy_commit file1 file2 ... filen commit message' "
+    return 
   fi
-  message="${@:-1}"
-  length=$(($#-1))
-  files=${@:1:$length}
-  git add $files
-  git commit -m "$message"
+
+  FILES=${@:1:$((${#@}-1))}
+  GIT_MESSAGE="${@:-1}"
+  git add $FILES
+  git commit $FILES -m $GIT_MESSAGE
   git push origin main
-  }
+}

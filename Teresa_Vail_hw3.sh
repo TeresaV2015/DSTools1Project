@@ -45,13 +45,13 @@ echo "Max frequency and word  = $max_freq"
 #Code must check even or odd  number of unique words. For even case median is the mean of middle two values,
 #for the odd case, it is middle value in sorted items.
 
-declare -a sorted_words_freqs=(`curl -s $1|tr [A-Z] [a-z]|grep -oE "\w+"|sort|uniq -c|sort -nr | awk '{print $1}'`)
+declare -a sorted_words_counts=(`curl -s $1|tr [A-Z] [a-z]|grep -oE "\w+"|sort|uniq -c|sort -nr | awk '{print $1}'`)
 declare -i x=$total_uniq_words%2
 
 if [ $x -eq  0 ]
 then
   ((mid= $total_uniq_words/2))
-  ((median=${sorted_words_freqs[mid]}+${sorted_words_freqs[mid-1]}/2))
+  ((median=(${sorted_words_counts[mid]}+${sorted_words_counts[mid-1]})/2))
 else
   ((mid= $total_uniq_words/2))
   ((median= ${sorted_words[mid]}))
@@ -71,9 +71,9 @@ for i in $(seq 1 $total_uniq_words)
      ((count++))
    done
 
-for i in $(seq 1 $total_uniq_words)
+for i in $(seq 0 $total_uniq_words)
    do
-    ((total_freq=total_freq+sorted_words_freqs[i]))
+    ((total_freq=total_freq+sorted_words_counts[i]))
    done
 
 
@@ -115,9 +115,23 @@ echo "Mean frequency using floating point arithemetics = $fp_mean"
 # # and file will be added , commited and pushed to remote master using one lazy_commit command.
 
 
+# function lazy_commit() {
+#   git add $1 &&
+#   git commit -m "$2" &&
+#   git branch -M main &&
+#   git push -u origin main
+#     }
+
 function lazy_commit() {
-  git add $1 &&
-  git commit -m "$2" &&
-  git branch -M main &&
-  git push -u origin main
-    }
+  if [ $# -lt 2 ]
+  then
+    echo "Not enough parameters"
+    return
+  fi
+  message="${@:-1}"
+  length=$(($#-1))
+  files=${@:1:$length}
+  git add $files
+  git commit -m "$message"
+  git push origin main
+  }
